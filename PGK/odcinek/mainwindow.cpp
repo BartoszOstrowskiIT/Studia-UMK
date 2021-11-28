@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <cmath>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,6 +13,19 @@ MainWindow::MainWindow(QWidget *parent)
     poczY = ui->rysujFrame->y();
 
     img = new QImage(szer,wys,QImage::Format_RGB32);
+    img_dump = new QImage(szer,wys,QImage::Format_RGB32);
+
+    spinBox_1 = ui->spinBox_1;
+    spinBox_2 = ui->spinBox_2;
+    spinBox_3 = ui->spinBox_3;
+    slider_1 = ui->horizontalSlider_1;
+    slider_2 = ui->horizontalSlider_2;
+    slider_3 = ui->horizontalSlider_3;
+
+    red = 0;
+    green = 0;
+    blue = 0;
+
     czysc();
     update();
 }
@@ -40,6 +52,42 @@ void MainWindow::on_cleanButton_clicked()
     update();
 }
 
+void MainWindow::on_spinBox_1_valueChanged(int value)
+{
+    red = value;
+    slider_1->setValue(value);
+}
+
+void MainWindow::on_spinBox_2_valueChanged(int value)
+{
+    green = value;
+    slider_2->setValue(value);
+}
+
+void MainWindow::on_spinBox_3_valueChanged(int value)
+{
+    blue = value;
+    slider_3->setValue(value);
+}
+
+void MainWindow::on_horizontalSlider_1_valueChanged(int value)
+{
+    red = value;
+    spinBox_1->setValue(value);
+}
+
+void MainWindow::on_horizontalSlider_2_valueChanged(int value)
+{
+    green = value;
+    spinBox_2->setValue(value);
+}
+
+void MainWindow::on_horizontalSlider_3_valueChanged(int value)
+{
+    blue = value;
+    spinBox_3->setValue(value);
+}
+
 void MainWindow::czysc()
 {
     unsigned char *ptr;
@@ -50,9 +98,47 @@ void MainWindow::czysc()
     {
         for(j=0; j<szer; j++)
         {
-            ptr[szer*4*i + 4*j]= 255;
+            ptr[szer*4*i + 4*j] = 255;
             ptr[szer*4*i + 4*j + 1] = 255;
             ptr[szer*4*i + 4*j + 2] = 255;
+        }
+    }
+}
+
+void MainWindow::zapisz()
+{
+    unsigned char *ptr;
+    ptr = img->bits();
+    unsigned char *ptr2;
+    ptr2 = img_dump->bits();
+
+    int i,j;
+    for(i=0; i<wys; i++)
+    {
+        for(j=0; j<szer; j++)
+        {
+            ptr2[szer*4*i + 4*j] = ptr[szer*4*i + 4*j];
+            ptr2[szer*4*i + 4*j + 1] = ptr[szer*4*i + 4*j + 1];
+            ptr2[szer*4*i + 4*j + 2] = ptr[szer*4*i + 4*j + 2];
+        }
+    }
+}
+
+void MainWindow::wczytaj()
+{
+    unsigned char *ptr;
+    ptr = img->bits();
+    unsigned char *ptr2;
+    ptr2 = img_dump->bits();
+
+    int i,j;
+    for(i=0; i<wys; i++)
+    {
+        for(j=0; j<szer; j++)
+        {
+            ptr[szer*4*i + 4*j] = ptr2[szer*4*i + 4*j];
+            ptr[szer*4*i + 4*j + 1] = ptr2[szer*4*i + 4*j + 1];
+            ptr[szer*4*i + 4*j + 2] = ptr2[szer*4*i + 4*j + 2];
         }
     }
 }
@@ -63,6 +149,22 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     clickY = event->y();
     clickX = clickX - poczX;
     clickY = clickY - poczY;
+    zapisz();
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    releaseX = event->x();
+    releaseY = event->y();
+    releaseX = releaseX - poczX;
+    releaseY = releaseY - poczY;
+
+    if ((clickX>=0)&&(clickY>=0)&&(clickX<szer)&&(clickY<wys)&&(releaseX>=0)&&(releaseY>=0)&&(releaseX<szer)&&(releaseY<wys))
+    {
+        wczytaj();
+        rysujOdcinek();
+    }
+    update();
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
@@ -72,19 +174,15 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
     releaseX = releaseX - poczX;
     releaseY = releaseY - poczY;
 
-    int red = 255;
-    int green = 0;
-    int blue = 0;
-
-
     if ((clickX>=0)&&(clickY>=0)&&(clickX<szer)&&(clickY<wys)&&(releaseX>=0)&&(releaseY>=0)&&(releaseX<szer)&&(releaseY<wys))
     {
-        rysujOdcinek(red, green, blue);
+        rysujOdcinek();
     }
     update();
+    zapisz();
 }
 
-void MainWindow::rysujOdcinek(int red, int green, int blue)
+void MainWindow::rysujOdcinek()
 {
     unsigned char *ptr;
     ptr = img->bits();

@@ -8,6 +8,7 @@
 #include <QSpinBox>
 #include <QSlider>
 #include <QMouseEvent>
+#include <cmath>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -25,6 +26,7 @@ private:
     Ui::MainWindow *ui;
 	
 	QImage *img;
+    QImage *img_dump;
 	
 	int szer;
     int wys;
@@ -35,15 +37,35 @@ private:
     int clickY;
     int releaseX;
     int releaseY;
+
+    int red;
+    int green;
+    int blue;
+
+    QSpinBox *spinBox_1;
+    QSpinBox *spinBox_2;
+    QSpinBox *spinBox_3;
+    QSlider *slider_1;
+    QSlider *slider_2;
+    QSlider *slider_3;
 	
 	void czysc();
-    void rysujOdcinek(int red, int green, int blue);
+    void zapisz();
+    void wczytaj();
+    void rysujOdcinek();
 	
 private slots:
     void on_cleanButton_clicked();
     void on_exitButton_clicked();
+    void on_spinBox_1_valueChanged(int value);
+    void on_spinBox_2_valueChanged(int value);
+    void on_spinBox_3_valueChanged(int value);
+    void on_horizontalSlider_1_valueChanged(int value);
+    void on_horizontalSlider_2_valueChanged(int value);
+    void on_horizontalSlider_3_valueChanged(int value);
     void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent*);
 };
-#endif // MAINWINDOW_H
+#endif
